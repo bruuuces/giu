@@ -106,6 +106,7 @@ type TableWidget struct {
 	fastMode     bool
 	freezeRow    int
 	freezeColumn int
+	columnEdit   func([]*TableColumnWidget)
 }
 
 func Table() *TableWidget {
@@ -150,6 +151,11 @@ func (t *TableWidget) Rows(rows ...*TableRowWidget) *TableWidget {
 	return t
 }
 
+func (t *TableWidget) ColumnEdit(columnEdit func([]*TableColumnWidget)) *TableWidget {
+	t.columnEdit = columnEdit
+	return t
+}
+
 func (t *TableWidget) Size(width, height float32) *TableWidget {
 	t.size = imgui.Vec2{X: width, Y: height}
 	return t
@@ -187,7 +193,11 @@ func (t *TableWidget) Build() {
 				col.BuildTableColumn()
 			}
 
-			imgui.TableHeadersRow()
+			if t.columnEdit != nil {
+				t.columnEdit(t.columns)
+			} else {
+				imgui.TableHeadersRow()
+			}
 		}
 
 		if t.fastMode {
